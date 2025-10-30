@@ -19,7 +19,7 @@
     },
     "algorithm":{
         "module":"algorithms",
-        "classname":"CCOAlgorithm",
+        "classname":"RandomSelection",
         "parameters":{
         }
     }

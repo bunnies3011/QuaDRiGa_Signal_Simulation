@@ -13,13 +13,13 @@
         "module":"problem_formulation",
         "classname": "CCORasterBlanketFormulation",
         "parameters":{
-            "lambda_weight": 0.9,
+            "lambda_weight": 0.6,
             "weak_coverage_threshold": -80
         }
     },
     "algorithm":{
         "module":"algorithms",
-        "classname":"RandomSelection",
+        "classname":"CCOAlgorithm",
         "parameters":{
         }
     }

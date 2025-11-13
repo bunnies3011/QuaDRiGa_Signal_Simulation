@@ -68,6 +68,9 @@ def main():
     # Plot RSRP map
     plot_rsrp_map(rsrp_powermap, interference_powermap, x_coords, y_coords, 
                  f'RSRP Map\nDowntilt range: {downtilt_range}, Power range: {power_range} dBm')
+    print("RSRP shape =", rsrp_powermap.shape)
+    print("Total pixels =", rsrp_powermap.size)
+
 
 if __name__ == "__main__":
     main()

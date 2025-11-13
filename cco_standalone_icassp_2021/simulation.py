@@ -110,7 +110,7 @@ class CCOSimulation:
 
     @staticmethod
     def print_result(result: Result, epoch: Optional[int] = None) -> None:
-        os.system("clear")
+        os.system("cls")
         if epoch:
             print("epoch :: ", epoch)
         print("Weak Coverage Percentage :: ", result.metrics[0] * 100)
@@ -121,3 +121,5 @@ class CCOSimulation:
 def run(json_data: Dict[Any, Any]):
     for i, result in enumerate(CCOSimulation.run_from_json(json_data), 1):
         CCOSimulation.print_result(result, i)
+if __name__ == "__main__":
+    run()

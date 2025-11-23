@@ -3,7 +3,7 @@
     "simulation": {
         "module":"simulation",
         "classname":"CCOSimulation",
-        "epochs": 500
+        "epochs": 120001
     },
     "simulated_rsrp":{
         "path":"data/power_maps/*.npz",
@@ -14,12 +14,13 @@
         "classname": "CCORasterBlanketFormulation",
         "parameters":{
             "lambda_weight": 0.6,
-            "weak_coverage_threshold": -80
+            "weak_coverage_threshold": -80,
+            "over_coverage_threshold": 6
         }
     },
     "algorithm":{
         "module":"algorithms",
-        "classname":"CCOAlgorithm",
+        "classname":"DDPGAlgorithm",
         "parameters":{
         }
     }

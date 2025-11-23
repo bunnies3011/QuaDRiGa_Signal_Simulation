@@ -110,16 +110,45 @@ class CCOSimulation:
 
     @staticmethod
     def print_result(result: Result, epoch: Optional[int] = None) -> None:
-        os.system("cls")
+        # Removed os.system("cls") to keep all results visible in terminal
         if epoch:
-            print("epoch :: ", epoch)
-        print("Weak Coverage Percentage :: ", result.metrics[0] * 100)
-        print("Over Coverage Percentage :: ", result.metrics[1] * 100)
-        print("Combining Objective Value :: ", result.objective_value)
+            print(f"[Epoch {epoch:3d}] Weak Coverage: {result.metrics[0]*100:6.2f}% | Over Coverage: {result.metrics[1]*100:6.2f}% | Objective: {result.objective_value:.2f}")
+        else:
+            print("Weak Coverage Percentage :: ", result.metrics[0] * 100)
+            print("Over Coverage Percentage :: ", result.metrics[1] * 100)
+            print("Combining Objective Value :: ", result.objective_value)
 
 
 def run(json_data: Dict[Any, Any]):
+    log_interval = 200  # Print log every 200 epochs
+
+    best_metric_sum = float("inf")
+    best_result_obj = None
+    best_epoch = -1
+
+    print("Starting simulation...")
+    num_epochs = json_data.get("simulation", {}).get("epochs", 0)
     for i, result in enumerate(CCOSimulation.run_from_json(json_data), 1):
-        CCOSimulation.print_result(result, i)
+        if i % log_interval == 0:
+            CCOSimulation.print_result(result, i)
+
+        current_metric_sum = result.metrics[0] + result.metrics[1]
+        if current_metric_sum < best_metric_sum and result.metrics[0] < 0.1 and result.metrics[1] < 0.16:
+            best_metric_sum = current_metric_sum
+            best_result_obj = result
+            best_epoch = i
+
+    print(f"\nSimulation finished after {num_epochs} epochs.")
+
+    if best_result_obj:
+        print("\n========================================================")
+        print("                BEST RESULT FOUND")
+        print("========================================================")
+        CCOSimulation.print_result(best_result_obj, best_epoch)
+        print(
+            f"Total Coverage Issue (Under + Over): {best_metric_sum * 100:6.2f}%"
+        )
+        print("========================================================")
+
 if __name__ == "__main__":
     run()

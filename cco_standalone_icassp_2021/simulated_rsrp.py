@@ -177,7 +177,7 @@ class SimulatedRSRP:
         return (self.num_basestations, self.num_total_sectors)
 
     def get_basestation_and_sector_idx(
-        self, flattened_sector_idx: int
+        self, flattened_sector_idx: int 
     ) -> Tuple[int, int]:
         """Given the flattened sector id, return the base station idx and its sector idx
         """
@@ -283,6 +283,7 @@ class SimulatedRSRP:
             raise ValueError("Current location is outside of the map!")
 
         # Check if the configurations format has the right shape
+        # configurations[0] is for downtilts and configurations[1] is for tx powers
         try:
             assert len(configurations) == 2
             assert (

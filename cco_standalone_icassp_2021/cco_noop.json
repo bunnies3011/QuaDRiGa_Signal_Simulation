@@ -3,7 +3,7 @@
     "simulation": {
         "module":"simulation",
         "classname":"CCOSimulation",
-        "epochs": 120001
+        "epochs": 600001
     },
     "simulated_rsrp":{
         "path":"data/power_maps/*.npz",

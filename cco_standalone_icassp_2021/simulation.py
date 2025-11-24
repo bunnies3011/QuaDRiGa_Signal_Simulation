@@ -1,5 +1,6 @@
 import importlib
 import os
+import collections
 from dataclasses import dataclass
 from typing import Any, Dict, Iterator, Optional, Tuple
 
@@ -119,6 +120,9 @@ class CCOSimulation:
             print("Combining Objective Value :: ", result.objective_value)
 
 
+import collections
+
+
 def run(json_data: Dict[Any, Any]):
     log_interval = 200  # Print log every 200 epochs
 
@@ -126,19 +130,60 @@ def run(json_data: Dict[Any, Any]):
     best_result_obj = None
     best_epoch = -1
 
-    print("Starting simulation...")
+    # For convergence check
+    history = collections.deque(maxlen=50)
+    convergence_check_interval = 10  # Check for convergence every 10 epochs to reduce overhead
+
+    print("Starting simulation with convergence check...")
     num_epochs = json_data.get("simulation", {}).get("epochs", 0)
+    actual_epochs = num_epochs
+
     for i, result in enumerate(CCOSimulation.run_from_json(json_data), 1):
         if i % log_interval == 0:
             CCOSimulation.print_result(result, i)
 
+        # Update best result found so far
         current_metric_sum = result.metrics[0] + result.metrics[1]
-        if current_metric_sum < best_metric_sum and result.metrics[0] < 0.1 and result.metrics[1] < 0.16:
+        if not np.isnan(current_metric_sum) and current_metric_sum < best_metric_sum:
             best_metric_sum = current_metric_sum
             best_result_obj = result
             best_epoch = i
+        
+        # Add current result to history for convergence check
+        history.append((result.metrics[0], result.metrics[1], result.objective_value))
 
-    print(f"\nSimulation finished after {num_epochs} epochs.")
+        # Check for convergence after enough history is built and on a schedule
+        if len(history) == 50 and i % convergence_check_interval == 0:
+            # np.ptp(a) is equivalent to np.max(a) - np.min(a)
+            data = np.array(history)
+            under_coverage_range = np.ptp(data[:, 0])
+            over_coverage_range = np.ptp(data[:, 1])
+            objective_range = np.ptp(data[:, 2])
+            if under_coverage_range <= 0.0001 and over_coverage_range <= 0.0001 and objective_range <= -10:
+                print(f"Convergence reached at epoch {i}. Stopping simulation.")
+                actual_epochs = i
+                
+                # --- NEW: Print last 50 values ---
+                print("\nLast 50 results before convergence:")
+                print("-------------------------------------------------------------------------")
+                print(f"{'Epoch':<5} | {'Under Coverage':<15} | {'Over Coverage':<15} | {'Objective Value':<15}")
+                print("-------------------------------------------------------------------------")
+                # To get the original epoch number for each item in history, we need to calculate it.
+                # history stores (under, over, obj) for epochs i-len(history)+1 to i.
+                start_epoch = i - len(history) + 1
+                for idx, (uc, oc, obj) in enumerate(history):
+                    print(f"{start_epoch + idx:<5} | {uc*100:<15.2f}% | {oc*100:<15.2f}% | {obj:<15.2f}")
+                print("-------------------------------------------------------------------------")
+                # --- END NEW ---
+                
+                break
+        
+        if i >= num_epochs:
+            actual_epochs = i
+            break
+
+
+    print(f"\nSimulation finished after {actual_epochs} epochs.")
 
     if best_result_obj:
         print("\n========================================================")
@@ -149,6 +194,10 @@ def run(json_data: Dict[Any, Any]):
             f"Total Coverage Issue (Under + Over): {best_metric_sum * 100:6.2f}%"
         )
         print("========================================================")
+    else:
+        print("\nWARNING: No valid best result was saved.")
+if __name__ == "__main__":
+    run()
 
 if __name__ == "__main__":
     run()
